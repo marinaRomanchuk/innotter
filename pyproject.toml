@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "innotter"
+version = "0.1.0"
+description = ""
+authors = ["marinaRomanchuk"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+Django = "^4.0.4"
+djangorestframework = "^3.13.1"
+psycopg2 = "^2.9.3"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
