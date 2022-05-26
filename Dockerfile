@@ -12,6 +12,7 @@ ENV PIP_DEFAULT_TIMEOUT=100 \
 
 # System deps:
 RUN pip install "poetry==$POETRY_VERSION"
+RUN apt-get update && apt-get install -y netcat
 
 # Copy only requirements to cache them in docker layer
 WORKDIR /code
