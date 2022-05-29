@@ -7,13 +7,13 @@ from .models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = [
+        fields = (
             "email",
             "role",
             "image_s3_path",
             "title",
             "is_blocked",
-        ]
+        )
 
 
 class SignupSerializer(serializers.ModelSerializer):

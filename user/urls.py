@@ -1,17 +1,12 @@
-from django.urls import re_path
+from rest_framework import routers
+from django.urls import path
 
 from .views import SignupView, UserViewSet
 
-users_detail = UserViewSet.as_view(
-    {
-        "get": "retrieve",
-        "put": "update",
-        "patch": "partial_update",
-        "delete": "destroy",
-    }
-)
+router = routers.SimpleRouter()
+router.register(r"users", UserViewSet)
 
 urlpatterns = [
-    re_path(r"^signup/$", SignupView.as_view(), name="signup"),
-    re_path(r"^users/(?P<pk>\d+)/$", users_detail, name="user-detail"),
+    path("signup/", SignupView.as_view(), name="signup"),
 ]
+urlpatterns += router.urls
