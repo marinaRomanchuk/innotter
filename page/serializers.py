@@ -7,14 +7,26 @@ from user.serializers import UserSerializer
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = "__all__"
+        fields = (
+            "id",
+            "name"
+        )
 
 
 class PageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Page
-        fields = ("name", "uuid", "tags", "followers", "description",
-                  "owner", "image", "is_private", "unblock_date")
+        fields = (
+            "name",
+            "uuid",
+            "tags",
+            "followers",
+            "description",
+            "owner",
+            "image",
+            "is_private",
+            "unblock_date"
+        )
 
 
 class PageListSerializer(serializers.ModelSerializer):
@@ -24,14 +36,29 @@ class PageListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Page
-        fields = ("name", "uuid", "tags", "followers", "description",
-                  "owner", "image", "is_private", "unblock_date")
+        fields = (
+            "name",
+            "uuid",
+            "tags",
+            "followers",
+            "description",
+            "owner",
+            "image",
+            "is_private",
+            "unblock_date"
+        )
 
 
 class PostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
-        fields = ("page", "content", "reply_to", "created_at", "updated_at")
+        fields = (
+            "page",
+            "content",
+            "reply_to",
+            "created_at",
+            "updated_at"
+        )
 
 
 class PostListSerializer(serializers.ModelSerializer):
@@ -40,4 +67,10 @@ class PostListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ("page", "content", "reply_to", "created_at", "updated_at")
+        fields = (
+            "page",
+            "content",
+            "reply_to",
+            "created_at",
+            "updated_at"
+        )
