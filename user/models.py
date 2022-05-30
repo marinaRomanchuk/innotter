@@ -8,6 +8,7 @@ class User(AbstractUser):
         MODERATOR = "moderator"
         ADMIN = "admin"
 
+    username = None
     email = models.EmailField(unique=True)
     image_s3_path = models.CharField(max_length=200, null=True, blank=True)
     role = models.CharField(max_length=9, choices=Roles.choices)
@@ -15,9 +16,12 @@ class User(AbstractUser):
     title = models.CharField(max_length=80)
     is_blocked = models.BooleanField(default=False)
 
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
+
     class Meta:
         verbose_name = "User"
         verbose_name_plural = "Users"
 
     def __str__(self):
-        return self.title
+        return self.email
