@@ -32,12 +32,3 @@ class SignupSerializer(serializers.ModelSerializer):
                 {"email": "User with the same email already exists."}
             )
         return attrs
-
-    def create(self, validated_data: dict) -> User:
-        user = User.objects.create(
-            email=validated_data["email"],
-        )
-
-        user.set_password(validated_data["password"])
-        user.save()
-        return user
