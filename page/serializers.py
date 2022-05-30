@@ -13,18 +13,18 @@ class TagSerializer(serializers.ModelSerializer):
 class PageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Page
-        fields = ("name", "uuid", "tags_list", "followers_list", "description",
+        fields = ("name", "uuid", "tags", "followers", "description",
                   "owner", "image", "is_private", "unblock_date")
 
 
 class PageListSerializer(serializers.ModelSerializer):
     owner = UserSerializer(read_only=True)
-    tags_list = TagSerializer(source="tags", many=True, read_only=True)
-    followers_list = UserSerializer(source="followers", many=True, read_only=True)
+    tags = TagSerializer(many=True, read_only=True)
+    followers = UserSerializer(many=True, read_only=True)
 
     class Meta:
         model = Page
-        fields = ("name", "uuid", "tags_list", "followers_list", "description",
+        fields = ("name", "uuid", "tags", "followers", "description",
                   "owner", "image", "is_private", "unblock_date")
 
 
