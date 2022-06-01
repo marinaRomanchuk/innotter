@@ -48,7 +48,7 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "authentication.backends.JWTAuthentication",
+        "authentication.backends.CsrfExemptSessionAuthentication",
     ],
 }
 
@@ -62,6 +62,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'authentication.middleware.CustomAuthenticationMiddleware',
 ]
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:3000", "http://127.0.0.1:3000"]
@@ -145,3 +146,6 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "user.User"
+
+JWT_ACCESS_TTL = 60 * 10
+JWT_REFRESH_TTL = 3600 * 24 * 7

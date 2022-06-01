@@ -1,14 +1,10 @@
 import jwt
-import os
+from django.conf import settings
 from datetime import datetime, timedelta
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 
 from user.models import User
-
-JWT_SECRET = os.getenv("SECRET_KEY")
-JWT_ACCESS_TTL = 60 * 10
-JWT_REFRESH_TTL = 3600 * 24 * 7
 
 
 class LoginSerializer(serializers.Serializer):
@@ -38,18 +34,18 @@ class LoginSerializer(serializers.Serializer):
         access_payload = {
             "iss": "backend-api",
             "user_id": validated_data["user"].id,
-            "exp": datetime.utcnow() + timedelta(seconds=JWT_ACCESS_TTL),
+            "exp": datetime.utcnow() + timedelta(seconds=settings.JWT_ACCESS_TTL),
             "type": 'access'
         }
-        access = jwt.encode(payload=access_payload, key=JWT_SECRET)
+        access = jwt.encode(payload=access_payload, key=settings.SECRET_KEY)
 
         refresh_payload = {
             "iss": "backend-api",
             "user_id": validated_data["user"].id,
-            "exp": datetime.utcnow() + timedelta(seconds=JWT_REFRESH_TTL),
+            "exp": datetime.utcnow() + timedelta(seconds=settings.JWT_REFRESH_TTL),
             "type": "refresh"
         }
-        refresh = jwt.encode(payload=refresh_payload, key=JWT_SECRET)
+        refresh = jwt.encode(payload=refresh_payload, key=settings.SECRET_KEY)
 
         return {
             "access": access,
@@ -68,7 +64,7 @@ class RefreshSerializer(serializers.Serializer):
 
         refresh_token = validated_data["refresh_token"]
         try:
-            payload = jwt.decode(refresh_token, JWT_SECRET, algorithms=["HS256"])
+            payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=["HS256"])
             if payload["type"] != "refresh":
                 error_msg = {"refresh_token": "Token type is not refresh!"}
                 raise serializers.ValidationError(error_msg)
@@ -86,18 +82,18 @@ class RefreshSerializer(serializers.Serializer):
         access_payload = {
             "iss": "backend-api",
             "user_id": validated_data["payload"]["user_id"],
-            "exp": datetime.utcnow() + timedelta(seconds=JWT_ACCESS_TTL),
+            "exp": datetime.utcnow() + timedelta(seconds=settings.JWT_ACCESS_TTL),
             "type": 'access'
         }
-        access = jwt.encode(payload=access_payload, key=JWT_SECRET)
+        access = jwt.encode(payload=access_payload, key=settings.SECRET_KEY)
 
         refresh_payload = {
             "iss": "backend-api",
             "user_id": validated_data["payload"]["user_id"],
-            "exp": datetime.utcnow() + timedelta(seconds=JWT_REFRESH_TTL),
+            "exp": datetime.utcnow() + timedelta(seconds=settings.JWT_REFRESH_TTL),
             "type": "refresh"
         }
-        refresh = jwt.encode(payload=refresh_payload, key=JWT_SECRET)
+        refresh = jwt.encode(payload=refresh_payload, key=settings.SECRET_KEY)
 
         return {
             "access": access,
