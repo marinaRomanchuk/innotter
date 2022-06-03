@@ -21,6 +21,7 @@ class PageSerializer(serializers.ModelSerializer):
             "uuid",
             "tags",
             "followers",
+            "follow_requests",
             "description",
             "owner",
             "image",
@@ -33,6 +34,7 @@ class PageListSerializer(serializers.ModelSerializer):
     owner = UserSerializer(read_only=True)
     tags = TagSerializer(many=True, read_only=True)
     followers = UserSerializer(many=True, read_only=True)
+    follow_requests = UserSerializer(many=True, read_only=True)
 
     class Meta:
         model = Page
@@ -41,6 +43,7 @@ class PageListSerializer(serializers.ModelSerializer):
             "uuid",
             "tags",
             "followers",
+            "follow_requests",
             "description",
             "owner",
             "image",
