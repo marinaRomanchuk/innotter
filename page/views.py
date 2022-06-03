@@ -1,5 +1,4 @@
 from django.core.exceptions import ValidationError
-
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -83,41 +82,31 @@ class PageViewSet(viewsets.ModelViewSet):
 
 
 class GetAcceptRefuseFollowerViewSet(viewsets.ModelViewSet):
-    queryset = Page.objects.all()
+    def get_queryset(self, page_pk=None):
+        return Page.objects.filter(pk=page_pk)
+
     permission_classes = (IsPageOwner,)
     serializer_class = PageSerializer
 
-    def retrieve(self, request, pk: int) -> Response:
-        page = get_object_or_404(Page, pk=pk)
+    def list(self, request, page_pk: int) -> Response:
+        page = get_object_or_404(Page, pk=page_pk)
         data = GetAcceptRefuseFollowerService.get_list_of_followers(page)
         return Response(data, status=status.HTTP_200_OK)
 
-    def post(self, request, pk: int) -> Response:
-        page = get_object_or_404(Page, pk=pk)
+    def post(self, request, pk: int, page_pk: int) -> Response:
+        page = get_object_or_404(Page, pk=page_pk)
         if page.is_private:
-            accept_all: bool = request.GET.get("accept_all") == "true"
-
-            try:
-                follower_id: Union[int, None] = int(request.GET.get("follower_id"))
-            except (ValueError, TypeError):
-                follower_id = None
-
-            GetAcceptRefuseFollowerService.accept_follow_requests(
-                accept_all, follower_id, page
-            )
+            GetAcceptRefuseFollowerService.accept_single_request(pk, page)
         return Response(status=status.HTTP_200_OK)
 
-    def destroy(self, request, pk: int) -> Response:
-        page = get_object_or_404(Page, pk=pk)
+    def create(self, request, page_pk: int) -> Response:
+        page = get_object_or_404(Page, pk=page_pk)
         if page.is_private:
-            refuse_all: bool = request.GET.get("refuse_all") == "true"
+            GetAcceptRefuseFollowerService.accept_follow_requests(page)
+        return Response(status=status.HTTP_200_OK)
 
-            try:
-                follower_id: Union[int, None] = int(request.GET.get("follower_id"))
-            except (ValueError, TypeError):
-                follower_id = None
-
-            GetAcceptRefuseFollowerService.refuse_follow_requests(
-                refuse_all, follower_id, page
-            )
+    def destroy(self, request, pk: int, page_pk: int) -> Response:
+        page = get_object_or_404(Page, pk=page_pk)
+        if page.is_private:
+            GetAcceptRefuseFollowerService.refuse_follow_requests(pk, page)
         return Response(status=status.HTTP_200_OK)
