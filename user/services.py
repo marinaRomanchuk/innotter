@@ -1,14 +1,13 @@
+from datetime import datetime
+
 from .models import User
 from page.models import Page
-from page.services import PageService
 
 
 class UserService:
     @staticmethod
     def block_users_pages(user: User) -> None:
-        pages_to_block = Page.objects.filter(owner=user)
-        for page in pages_to_block:
-            PageService.block(page, "permanently")
+        Page.objects.filter(owner=user).update(unblock_date=datetime.max)
 
     @staticmethod
     def block_user(user: User) -> None:
@@ -18,10 +17,7 @@ class UserService:
 
     @staticmethod
     def unblock_users_pages(user: User) -> None:
-        pages_to_unblock = Page.objects.filter(owner=user)
-        for page in pages_to_unblock:
-            page.unblock_date = None
-            page.save()
+        Page.objects.filter(owner=user).update(unblock_date=None)
 
     @staticmethod
     def unblock_user(user: User) -> None:
