@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from .services import GetAcceptRefuseFollowerService
+from .services import GetAcceptRefuseFollowerService, PostService, PageService
 from .models import Tag, Post, Page
 from .serializers import (
     TagSerializer,
@@ -29,11 +29,49 @@ class PostViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         return self.serializer_classes.get(self.action, self.default_serializer_class)
 
+    def list(self, request):
+        queryset = PostService.get_feed(self.request.user)
+        serializer = PostListSerializer(
+            queryset, many=True, context={"request": request}
+        )
+        return Response(serializer.data)
+
+
+class LikeViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = (IsAuthenticated,)
+
+    def list(self, request, post_pk: int):
+        post = get_object_or_404(Post, pk=post_pk)
+        data = PostService.get_dict_of_pages_from_queryset(post.likes.all())
+        return Response(data, status=status.HTTP_200_OK)
+
+    def post(self, request, pk: int, post_pk: int):
+        post = get_object_or_404(Post, pk=post_pk)
+        PostService.set_like(post, pk)
+        return Response(status=status.HTTP_200_OK)
+
+    def destroy(self, request, pk: int, post_pk: int):
+        post = get_object_or_404(Post, pk=post_pk)
+        PostService.remove_like(post, pk)
+        return Response(status=status.HTTP_200_OK)
+
 
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     permission_classes = (IsAuthenticated,)
+
+    def post(self, request, pk: int, page_pk: int):
+        page = get_object_or_404(Page, pk=page_pk)
+        PageService.add_tag(page, pk)
+        return Response(status=status.HTTP_200_OK)
+
+    def destroy(self, request, pk: int, page_pk: int):
+        page = get_object_or_404(Page, pk=page_pk)
+        PageService.remove_tag(page, pk)
+        return Response(status=status.HTTP_200_OK)
 
 
 class PageViewSet(viewsets.ModelViewSet):
@@ -53,8 +91,7 @@ class PageViewSet(viewsets.ModelViewSet):
         page = get_object_or_404(Page, pk=pk)
 
         try:
-            GetAcceptRefuseFollowerService.block(page, request.POST.get("unblock_date"))
-
+            PageService.block(page, request.POST.get("unblock_date"))
         except ValidationError:
             return Response(
                 {"detail": "Invalid data format"}, status=status.HTTP_400_BAD_REQUEST
@@ -77,8 +114,16 @@ class PageViewSet(viewsets.ModelViewSet):
                 {"detail": "You don't have a permission to subscribe page twice."},
                 status=status.HTTP_403_FORBIDDEN,
             )
-        GetAcceptRefuseFollowerService.subscribe(request.user, page)
+        PageService.subscribe(request.user, page)
         return Response(status=status.HTTP_200_OK)
+
+    @action(methods=["get"], detail=True, permission_classes=(IsPageOwner,))
+    def liked(self, request, pk: int):
+        queryset_of_liked_posts = Post.objects.filter(likes=pk)
+        serializer = PostSerializer(
+            queryset_of_liked_posts, many=True, context={"request": request}
+        )
+        return Response(serializer.data)
 
 
 class GetAcceptRefuseFollowerViewSet(viewsets.ModelViewSet):

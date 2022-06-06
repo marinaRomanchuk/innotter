@@ -7,10 +7,7 @@ from user.serializers import UserSerializer
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = (
-            "id",
-            "name"
-        )
+        fields = ("id", "name")
 
 
 class PageSerializer(serializers.ModelSerializer):
@@ -26,7 +23,7 @@ class PageSerializer(serializers.ModelSerializer):
             "owner",
             "image",
             "is_private",
-            "unblock_date"
+            "unblock_date",
         )
 
 
@@ -48,7 +45,7 @@ class PageListSerializer(serializers.ModelSerializer):
             "owner",
             "image",
             "is_private",
-            "unblock_date"
+            "unblock_date",
         )
 
 
@@ -60,13 +57,15 @@ class PostSerializer(serializers.ModelSerializer):
             "content",
             "reply_to",
             "created_at",
-            "updated_at"
+            "updated_at",
+            "likes",
         )
 
 
 class PostListSerializer(serializers.ModelSerializer):
     page = PageSerializer(read_only=True)
     reply_to = PostSerializer(read_only=True)
+    likes = PageSerializer(many=True, read_only=True)
 
     class Meta:
         model = Post
@@ -75,5 +74,6 @@ class PostListSerializer(serializers.ModelSerializer):
             "content",
             "reply_to",
             "created_at",
-            "updated_at"
+            "updated_at",
+            "likes",
         )

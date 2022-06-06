@@ -1,6 +1,7 @@
-from django.db.models import QuerySet
+from datetime import datetime
+from django.db.models import QuerySet, Q
 
-from .models import Page
+from .models import Page, Post
 from user.models import User
 
 
@@ -43,6 +44,8 @@ class GetAcceptRefuseFollowerService:
         page.follow_requests.remove(follower_id)
         page.save()
 
+
+class PageService:
     @staticmethod
     def subscribe(user: User, page: Page) -> None:
         if page.is_private:
@@ -53,5 +56,46 @@ class GetAcceptRefuseFollowerService:
 
     @staticmethod
     def block(page: Page, unblock_date: str) -> None:
-        page.unblock_date = unblock_date
+        if unblock_date.lower() == "permanently":
+            page.unblock_date = datetime.max
+        else:
+            page.unblock_date = unblock_date
         page.save()
+
+    @staticmethod
+    def add_tag(page: Page, tag_id: int) -> None:
+        page.tags.add(tag_id)
+        page.save()
+
+    @staticmethod
+    def remove_tag(page: Page, tag_id: int) -> None:
+        page.tags.remove(tag_id)
+        page.save()
+
+
+class PostService:
+    @staticmethod
+    def get_feed(user: User) -> QuerySet:
+        queryset = Post.objects.all()
+        following: list = Page.objects.filter(
+            Q(followers=user) | Q(owner=user)
+        ).values_list("id", flat=True)
+        queryset = queryset.filter(page__in=following)
+        return queryset
+
+    @staticmethod
+    def get_dict_of_pages_from_queryset(data: QuerySet) -> dict:
+        result_dict = {"count": data.count()}
+        for i, j in enumerate(data):
+            result_dict.update({i: j.id})
+        return result_dict
+
+    @staticmethod
+    def set_like(post: Post, page_id: int) -> None:
+        post.likes.add(page_id)
+        post.save()
+
+    @staticmethod
+    def remove_like(post: Post, page_id: int) -> None:
+        post.likes.remove(page_id)
+        post.save()
