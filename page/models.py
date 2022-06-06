@@ -18,7 +18,9 @@ class Page(models.Model):
     description = models.TextField()
     tags = models.ManyToManyField("Tag", related_name="pages")
 
-    owner = models.ForeignKey("user.User", on_delete=models.CASCADE, related_name="pages")
+    owner = models.ForeignKey(
+        "user.User", on_delete=models.CASCADE, related_name="pages"
+    )
     followers = models.ManyToManyField("user.User", related_name="follows")
 
     image = models.URLField(null=True, blank=True)
@@ -40,10 +42,14 @@ class Post(models.Model):
     page = models.ForeignKey(Page, on_delete=models.CASCADE, related_name="posts")
     content = models.CharField(max_length=180)
 
-    reply_to = models.ForeignKey("Post", on_delete=models.SET_NULL, null=True, related_name="replies")
+    reply_to = models.ForeignKey(
+        "Post", on_delete=models.SET_NULL, null=True, related_name="replies"
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    likes = models.ManyToManyField("Page", related_name="likes")
 
     class Meta:
         verbose_name = "Post"
