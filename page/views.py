@@ -14,7 +14,7 @@ from .serializers import (
     PostListSerializer,
     PageListSerializer,
 )
-from user.permissions import IsPageOwner, IsModerator, IsAdmin
+from user.permissions import IsPageOwner, IsModerator, IsAdmin, IsPostOwner
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -24,7 +24,7 @@ class PostViewSet(viewsets.ModelViewSet):
         "retrieve": PostSerializer,
     }
     default_serializer_class = PostSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsPostOwner,)
 
     def get_serializer_class(self):
         return self.serializer_classes.get(self.action, self.default_serializer_class)
@@ -40,20 +40,37 @@ class PostViewSet(viewsets.ModelViewSet):
 class LikeViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = (IsAuthenticated,)
+    permission_classes = (IsPostOwner,)
+
+    def get_object(self, post_pk: int) -> Post:
+        obj = get_object_or_404(Post, pk=post_pk)
+        self.check_object_permissions(self.request, obj)
+        return obj
 
     def list(self, request, post_pk: int):
-        post = get_object_or_404(Post, pk=post_pk)
+        post = self.get_object(post_pk)
         data = PostService.get_dict_of_pages_from_queryset(post.likes.all())
         return Response(data, status=status.HTTP_200_OK)
 
     def post(self, request, pk: int, post_pk: int):
         post = get_object_or_404(Post, pk=post_pk)
+        if post.page.is_private and request.user not in post.page.followers.all():
+            return Response(
+                {"detail": "You don't have a permission to set like on private page."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         PostService.set_like(post, pk)
         return Response(status=status.HTTP_200_OK)
 
     def destroy(self, request, pk: int, post_pk: int):
         post = get_object_or_404(Post, pk=post_pk)
+        if post.page.is_private and request.user not in post.page.followers.all():
+            return Response(
+                {
+                    "detail": "You don't have a permission to remove like on private page."
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
         PostService.remove_like(post, pk)
         return Response(status=status.HTTP_200_OK)
 
@@ -119,7 +136,8 @@ class PageViewSet(viewsets.ModelViewSet):
 
     @action(methods=["get"], detail=True, permission_classes=(IsPageOwner,))
     def liked(self, request, pk: int):
-        queryset_of_liked_posts = Post.objects.filter(likes=pk)
+        page = self.get_object()
+        queryset_of_liked_posts = Post.objects.filter(likes=page)
         serializer = PostSerializer(
             queryset_of_liked_posts, many=True, context={"request": request}
         )
@@ -133,25 +151,40 @@ class GetAcceptRefuseFollowerViewSet(viewsets.ModelViewSet):
     permission_classes = (IsPageOwner,)
     serializer_class = PageSerializer
 
+    def get_object(self, page_pk: int) -> Page:
+        obj = get_object_or_404(Page, pk=page_pk)
+        self.check_object_permissions(self.request, obj)
+        return obj
+
     def list(self, request, page_pk: int) -> Response:
-        page = get_object_or_404(Page, pk=page_pk)
+        page = self.get_object(page_pk)
         data = GetAcceptRefuseFollowerService.get_list_of_followers(page)
         return Response(data, status=status.HTTP_200_OK)
 
     def post(self, request, pk: int, page_pk: int) -> Response:
-        page = get_object_or_404(Page, pk=page_pk)
+        page = self.get_object(page_pk)
         if page.is_private:
             GetAcceptRefuseFollowerService.accept_single_request(pk, page)
         return Response(status=status.HTTP_200_OK)
 
     def create(self, request, page_pk: int) -> Response:
-        page = get_object_or_404(Page, pk=page_pk)
+        page = self.get_object(page_pk)
         if page.is_private:
             GetAcceptRefuseFollowerService.accept_follow_requests(page)
         return Response(status=status.HTTP_200_OK)
 
     def destroy(self, request, pk: int, page_pk: int) -> Response:
-        page = get_object_or_404(Page, pk=page_pk)
+        page = self.get_object(page_pk)
         if page.is_private:
             GetAcceptRefuseFollowerService.refuse_follow_requests(pk, page)
         return Response(status=status.HTTP_200_OK)
+
+
+class SearchViewSet(viewsets.ModelViewSet):
+    permission_classes = (IsAuthenticated,)
+    http_method_names = ("get",)
+
+    def list(self, request):
+        search = self.request.GET.get("search")
+        data = PageService.get_search_result(search)
+        return Response(data, status=status.HTTP_200_OK)

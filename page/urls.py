@@ -6,6 +6,7 @@ from .views import (
     PageViewSet,
     GetAcceptRefuseFollowerViewSet,
     LikeViewSet,
+    SearchViewSet,
 )
 
 post_router = routers.SimpleRouter()
@@ -25,8 +26,12 @@ follower_router.register(
 tags_router = routers.NestedSimpleRouter(page_router, r"pages", lookup="page")
 tags_router.register(r"tags", TagViewSet, basename="tag")
 
+search_router = routers.SimpleRouter()
+search_router.register(r"search", SearchViewSet, basename="search")
+
 urlpatterns = page_router.urls
 urlpatterns += follower_router.urls
 urlpatterns += tags_router.urls
 urlpatterns += post_router.urls
 urlpatterns += like_router.urls
+urlpatterns += search_router.urls
