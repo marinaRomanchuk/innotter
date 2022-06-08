@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+import page.models
+
 
 class User(AbstractUser):
     class Roles(models.TextChoices):
@@ -10,7 +12,9 @@ class User(AbstractUser):
 
     username = None
     email = models.EmailField(unique=True)
-    image_s3_path = models.CharField(max_length=200, null=True, blank=True)
+    image_s3_path = models.CharField(
+        max_length=200, null=True, blank=True, validators=[page.models.validate_url]
+    )
     role = models.CharField(max_length=9, choices=Roles.choices)
 
     title = models.CharField(max_length=80)

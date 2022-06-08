@@ -22,7 +22,7 @@ class LoginSerializer(serializers.Serializer):
         error_msg = "email or password are incorrect"
         try:
             user = User.objects.get(email=email)
-            if authenticate(username=email, password=password):
+            if not authenticate(username=email, password=password):
                 raise serializers.ValidationError(error_msg)
             validated_data["user"] = user
         except User.DoesNotExist:
@@ -35,7 +35,7 @@ class LoginSerializer(serializers.Serializer):
             "iss": "backend-api",
             "user_id": validated_data["user"].id,
             "exp": datetime.utcnow() + timedelta(seconds=settings.JWT_ACCESS_TTL),
-            "type": 'access'
+            "type": 'access',
         }
         access = jwt.encode(payload=access_payload, key=settings.SECRET_KEY)
 
@@ -43,14 +43,11 @@ class LoginSerializer(serializers.Serializer):
             "iss": "backend-api",
             "user_id": validated_data["user"].id,
             "exp": datetime.utcnow() + timedelta(seconds=settings.JWT_REFRESH_TTL),
-            "type": "refresh"
+            "type": "refresh",
         }
         refresh = jwt.encode(payload=refresh_payload, key=settings.SECRET_KEY)
 
-        return {
-            "access": access,
-            "refresh": refresh
-        }
+        return {"access": access, "refresh": refresh}
 
 
 class RefreshSerializer(serializers.Serializer):
@@ -64,7 +61,9 @@ class RefreshSerializer(serializers.Serializer):
 
         refresh_token = validated_data["refresh_token"]
         try:
-            payload = jwt.decode(refresh_token, settings.SECRET_KEY, algorithms=["HS256"])
+            payload = jwt.decode(
+                refresh_token, settings.SECRET_KEY, algorithms=["HS256"]
+            )
             if payload["type"] != "refresh":
                 error_msg = {"refresh_token": "Token type is not refresh!"}
                 raise serializers.ValidationError(error_msg)
@@ -83,7 +82,7 @@ class RefreshSerializer(serializers.Serializer):
             "iss": "backend-api",
             "user_id": validated_data["payload"]["user_id"],
             "exp": datetime.utcnow() + timedelta(seconds=settings.JWT_ACCESS_TTL),
-            "type": 'access'
+            "type": 'access',
         }
         access = jwt.encode(payload=access_payload, key=settings.SECRET_KEY)
 
@@ -91,11 +90,8 @@ class RefreshSerializer(serializers.Serializer):
             "iss": "backend-api",
             "user_id": validated_data["payload"]["user_id"],
             "exp": datetime.utcnow() + timedelta(seconds=settings.JWT_REFRESH_TTL),
-            "type": "refresh"
+            "type": "refresh",
         }
         refresh = jwt.encode(payload=refresh_payload, key=settings.SECRET_KEY)
 
-        return {
-            "access": access,
-            "refresh": refresh
-        }
+        return {"access": access, "refresh": refresh}

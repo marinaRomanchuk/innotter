@@ -24,3 +24,15 @@ class UserService:
         user.is_blocked = False
         user.save()
         UserService.unblock_users_pages(user)
+
+    @staticmethod
+    def create_admin(user: User) -> None:
+        user.role = "admin"
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
+
+    @staticmethod
+    def create_moderator(user: User) -> None:
+        user.role = "moderator"
+        user.save()

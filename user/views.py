@@ -31,3 +31,15 @@ class UserViewSet(viewsets.ModelViewSet):
         user = get_object_or_404(User, pk=pk)
         UserService.unblock_user(user)
         return Response(status=status.HTTP_200_OK)
+
+    @action(methods=["post"], detail=True, permission_classes=(IsAdmin,))
+    def admin(self, request, pk: int) -> Response:
+        user = get_object_or_404(User, pk=pk)
+        UserService.create_admin(user)
+        return Response(status=status.HTTP_200_OK)
+
+    @action(methods=["post"], detail=True, permission_classes=(IsAdmin,))
+    def moderator(self, request, pk: int) -> Response:
+        user = get_object_or_404(User, pk=pk)
+        UserService.create_moderator(user)
+        return Response(status=status.HTTP_200_OK)
