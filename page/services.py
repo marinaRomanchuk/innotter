@@ -1,6 +1,8 @@
 from datetime import datetime
 from django.db.models import QuerySet, Q
 
+from .serializers import PageListSerializer
+from user.serializers import UserSerializer
 from .models import Page, Post
 from user.models import User
 
@@ -71,6 +73,25 @@ class PageService:
     def remove_tag(page: Page, tag_id: int) -> None:
         page.tags.remove(tag_id)
         page.save()
+
+    @staticmethod
+    def get_search_result(search: str) -> dict:
+        page_list = Page.objects.filter(
+            Q(name__icontains=search)
+            | Q(uuid__icontains=search)
+            | Q(tags__name__icontains=search)
+        )
+        user_list = User.objects.filter(
+            Q(email__icontains=search) | Q(first_name__icontains=search)
+        )
+
+        page_serializer = PageListSerializer(page_list, many=True)
+        user_serializer = UserSerializer(user_list, many=True)
+        result_dict = {
+            "pages": page_serializer.data,
+            "users": user_serializer.data,
+        }
+        return result_dict
 
 
 class PostService:
