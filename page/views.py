@@ -103,7 +103,7 @@ class PageViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         return self.serializer_classes.get(self.action, self.default_serializer_class)
 
-    @action(methods=["post"], detail=True, permission_classes=(IsModerator | IsAdmin,))
+    @action(methods=("post",), detail=True, permission_classes=(IsModerator | IsAdmin,))
     def block(self, request, pk: int) -> Response:
         page = get_object_or_404(Page, pk=pk)
 
@@ -115,7 +115,7 @@ class PageViewSet(viewsets.ModelViewSet):
             )
         return Response(status=status.HTTP_200_OK)
 
-    @action(methods=["post"], detail=True, permission_classes=(IsAuthenticated,))
+    @action(methods=("post",), detail=True, permission_classes=(IsAuthenticated,))
     def subscribe(self, request, pk: int) -> Response:
         page = get_object_or_404(Page, pk=pk)
         if request.user == page.owner:
@@ -134,7 +134,7 @@ class PageViewSet(viewsets.ModelViewSet):
         PageService.subscribe(request.user, page)
         return Response(status=status.HTTP_200_OK)
 
-    @action(methods=["get"], detail=True, permission_classes=(IsPageOwner,))
+    @action(methods=("get",), detail=True, permission_classes=(IsPageOwner,))
     def liked(self, request, pk: int):
         page = self.get_object()
         queryset_of_liked_posts = Post.objects.filter(likes=page)

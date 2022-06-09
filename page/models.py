@@ -1,3 +1,8 @@
+import urllib
+import mimetypes
+from urllib.error import HTTPError, URLError
+
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -12,6 +17,19 @@ class Tag(models.Model):
         return self.name
 
 
+def validate_url(url: str):
+    try:
+        urllib.request.urlopen(url)
+    except (HTTPError, URLError):
+        raise ValidationError("Invalid url.")
+
+    try:
+        if not mimetypes.MimeTypes().guess_type(url)[0].startswith("image"):
+            raise ValidationError("Only images allowed.")
+    except (IndexError, AttributeError):
+        raise ValidationError("Only images allowed.")
+
+
 class Page(models.Model):
     name = models.CharField(max_length=80)
     uuid = models.CharField(max_length=30, unique=True)
@@ -23,7 +41,7 @@ class Page(models.Model):
     )
     followers = models.ManyToManyField("user.User", related_name="follows")
 
-    image = models.URLField(null=True, blank=True)
+    image = models.URLField(null=True, blank=True, validators=(validate_url,))
 
     is_private = models.BooleanField(default=False)
     follow_requests = models.ManyToManyField("user.User", related_name="requests")

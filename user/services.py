@@ -24,3 +24,15 @@ class UserService:
         user.is_blocked = False
         user.save()
         UserService.unblock_users_pages(user)
+
+    @staticmethod
+    def change_to_admin(user_id: int) -> None:
+        User.objects.filter(pk=user_id).update(
+            role=User.Roles.ADMIN, is_staff=True, is_superuser=True
+        )
+
+    @staticmethod
+    def change_to_moderator(user_id: int) -> None:
+        User.objects.filter(pk=user_id).update(
+            role=User.Roles.MODERATOR, is_staff=False, is_superuser=False
+        )
