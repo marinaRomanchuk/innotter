@@ -41,7 +41,7 @@ class Page(models.Model):
     )
     followers = models.ManyToManyField("user.User", related_name="follows")
 
-    image = models.URLField(null=True, blank=True, validators=[validate_url])
+    image = models.URLField(null=True, blank=True, validators=(validate_url,))
 
     is_private = models.BooleanField(default=False)
     follow_requests = models.ManyToManyField("user.User", related_name="requests")

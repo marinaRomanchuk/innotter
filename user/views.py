@@ -20,26 +20,24 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
 
-    @action(methods=["post"], detail=True, permission_classes=(IsAdmin,))
+    @action(methods=("post",), detail=True, permission_classes=(IsAdmin,))
     def block(self, request, pk: int) -> Response:
         user = get_object_or_404(User, pk=pk)
         UserService.block_user(user)
         return Response(status=status.HTTP_200_OK)
 
-    @action(methods=["post"], detail=True, permission_classes=(IsAdmin,))
+    @action(methods=("post",), detail=True, permission_classes=(IsAdmin,))
     def unblock(self, request, pk: int) -> Response:
         user = get_object_or_404(User, pk=pk)
         UserService.unblock_user(user)
         return Response(status=status.HTTP_200_OK)
 
-    @action(methods=["post"], detail=True, permission_classes=(IsAdmin,))
+    @action(methods=("post",), detail=True, permission_classes=(IsAdmin,))
     def admin(self, request, pk: int) -> Response:
-        user = get_object_or_404(User, pk=pk)
-        UserService.create_admin(user)
+        UserService.change_to_admin(pk)
         return Response(status=status.HTTP_200_OK)
 
-    @action(methods=["post"], detail=True, permission_classes=(IsAdmin,))
+    @action(methods=("post",), detail=True, permission_classes=(IsAdmin,))
     def moderator(self, request, pk: int) -> Response:
-        user = get_object_or_404(User, pk=pk)
-        UserService.create_moderator(user)
+        UserService.change_to_moderator(pk)
         return Response(status=status.HTTP_200_OK)

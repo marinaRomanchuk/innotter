@@ -26,13 +26,13 @@ class UserService:
         UserService.unblock_users_pages(user)
 
     @staticmethod
-    def create_admin(user: User) -> None:
-        user.role = "admin"
-        user.is_staff = True
-        user.is_superuser = True
-        user.save()
+    def change_to_admin(user_id: int) -> None:
+        User.objects.filter(pk=user_id).update(
+            role=User.Roles.ADMIN, is_staff=True, is_superuser=True
+        )
 
     @staticmethod
-    def create_moderator(user: User) -> None:
-        user.role = "moderator"
-        user.save()
+    def change_to_moderator(user_id: int) -> None:
+        User.objects.filter(pk=user_id).update(
+            role=User.Roles.MODERATOR, is_staff=False, is_superuser=False
+        )

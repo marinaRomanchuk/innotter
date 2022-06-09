@@ -22,7 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
 class SignupSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(
-        write_only=True, required=True, validators=[validate_password]
+        write_only=True, required=True, validators=(validate_password,)
     )
 
     class Meta:
@@ -40,6 +40,6 @@ class SignupSerializer(serializers.ModelSerializer):
         user = User.objects.create(
             email=validated_data["email"],
             password=make_password(validated_data["password"]),
-            role="user",
+            role=User.Roles.USER,
         )
         return user
