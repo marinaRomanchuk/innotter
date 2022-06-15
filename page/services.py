@@ -58,10 +58,14 @@ class PageService:
 
     @staticmethod
     def block(page: Page, unblock_date: str) -> None:
+        from .tasks import unblock_page
+
         if unblock_date.lower() == "permanently":
             page.unblock_date = datetime.max
+            unblock_page.apply_async((page.id,), eta=datetime.max)
         else:
             page.unblock_date = unblock_date
+            unblock_page.apply_async((page.id,), eta=unblock_date)
         page.save()
 
     @staticmethod
