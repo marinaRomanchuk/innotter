@@ -4,6 +4,7 @@ from django.db.models import QuerySet, Q
 from .serializers import PageListSerializer
 from user.serializers import UserSerializer
 from .models import Page, Post
+from .tasks import unblock_page
 from user.models import User
 
 
@@ -58,8 +59,6 @@ class PageService:
 
     @staticmethod
     def block(page: Page, unblock_date: str) -> None:
-        from .tasks import unblock_page
-
         if unblock_date.lower() == "permanently":
             page.unblock_date = datetime.max
             unblock_page.apply_async((page.id,), eta=datetime.max)
