@@ -1,5 +1,6 @@
 import urllib
 import mimetypes
+from datetime import datetime
 from urllib.error import HTTPError, URLError
 
 from django.core.exceptions import ValidationError
@@ -30,23 +31,37 @@ def validate_url(url: str):
         raise ValidationError("Only images allowed.")
 
 
+class PageManager(models.Manager):
+    def get_queryset(self):
+        return (
+            super()
+            .get_queryset()
+            .filter(unblock_date=None)
+            .exclude(unblock_date__lt=datetime.now())
+        )
+
+
 class Page(models.Model):
     name = models.CharField(max_length=80)
     uuid = models.CharField(max_length=30, unique=True)
     description = models.TextField()
-    tags = models.ManyToManyField("Tag", related_name="pages")
+    tags = models.ManyToManyField("Tag", blank=True, related_name="pages")
 
     owner = models.ForeignKey(
         "user.User", on_delete=models.CASCADE, related_name="pages"
     )
-    followers = models.ManyToManyField("user.User", related_name="follows")
+    followers = models.ManyToManyField("user.User", blank=True, related_name="follows")
 
     image = models.URLField(null=True, blank=True, validators=(validate_url,))
 
     is_private = models.BooleanField(default=False)
-    follow_requests = models.ManyToManyField("user.User", related_name="requests")
+    follow_requests = models.ManyToManyField(
+        "user.User", blank=True, related_name="requests"
+    )
 
     unblock_date = models.DateTimeField(null=True, blank=True)
+
+    objects = PageManager()
 
     class Meta:
         verbose_name = "Page"
@@ -67,7 +82,7 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    likes = models.ManyToManyField("Page", related_name="likes")
+    likes = models.ManyToManyField("Page", blank=True, related_name="likes")
 
     class Meta:
         verbose_name = "Post"

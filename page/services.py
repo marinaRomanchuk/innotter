@@ -1,11 +1,16 @@
+import enum
+
 from datetime import datetime
 from django.db.models import QuerySet, Q
 
 from .serializers import PageListSerializer
 from user.serializers import UserSerializer
 from .models import Page, Post
-from .tasks import unblock_page
 from user.models import User
+
+
+class BlockDate(enum.Enum):
+    forever = "permanently"
 
 
 class GetAcceptRefuseFollowerService:
@@ -59,12 +64,10 @@ class PageService:
 
     @staticmethod
     def block(page: Page, unblock_date: str) -> None:
-        if unblock_date.lower() == "permanently":
+        if unblock_date.lower() == BlockDate.forever:
             page.unblock_date = datetime.max
-            unblock_page.apply_async((page.id,), eta=datetime.max)
         else:
             page.unblock_date = unblock_date
-            unblock_page.apply_async((page.id,), eta=unblock_date)
         page.save()
 
     @staticmethod
