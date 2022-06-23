@@ -4,7 +4,7 @@ from django.urls import path
 from .views import SignupView, UserViewSet
 
 router = routers.SimpleRouter()
-router.register(r"users", UserViewSet)
+router.register(r"users", UserViewSet, basename="user")
 
 urlpatterns = [
     path("signup/", SignupView.as_view(), name="signup"),
