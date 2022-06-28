@@ -1,4 +1,5 @@
 import factory
+from factory import lazy_attribute
 from faker import Faker
 
 from user.factories import UserFactory
@@ -15,10 +16,10 @@ class TagFactory(factory.django.DjangoModelFactory):
 
 
 class PageFactory(factory.django.DjangoModelFactory):
-    name = fake.word()
+    name = lazy_attribute(lambda a: fake.word())
     owner = factory.SubFactory(UserFactory)
-    uuid = fake.word()
-    description = fake.text()
+    uuid = lazy_attribute(lambda a: fake.word())
+    description = lazy_attribute(lambda a: fake.text())
     is_private = False
 
     class Meta:
@@ -26,7 +27,7 @@ class PageFactory(factory.django.DjangoModelFactory):
 
 
 class PostFactory(factory.django.DjangoModelFactory):
-    content = fake.word()
+    content = lazy_attribute(lambda a: fake.word())
     page = factory.SubFactory(PageFactory)
 
     class Meta:

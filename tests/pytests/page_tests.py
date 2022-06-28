@@ -3,7 +3,7 @@ import pytest
 from django.urls import reverse
 from rest_framework import status
 
-from page.models import Tag, Post, Page
+from page.models import Post, Page
 from .user_tests import (
     user,
     another_user,
@@ -28,7 +28,7 @@ def page(user):
 
 @pytest.fixture(scope="function")
 def private_page(another_user):
-    return PageFactory(is_private=True, owner=another_user, uuid=fake.word())
+    return PageFactory(is_private=True, owner=another_user)
 
 
 @pytest.fixture(scope="function")
