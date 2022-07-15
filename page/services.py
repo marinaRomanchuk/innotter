@@ -7,7 +7,7 @@ from .serializers import PageListSerializer
 from user.serializers import UserSerializer
 from .models import Page, Post
 from user.models import User
-from .producer import publish
+from .producer import producer
 
 
 class BlockDate(enum.Enum):
@@ -63,8 +63,8 @@ class PageService:
             page.followers.add(user)
         page.save()
 
-        publish(
-            "new_follower",
+        producer.publish(
+            "followers",
             {
                 "page_id": str(page.id),
                 "follower_id": user.id,
@@ -133,8 +133,8 @@ class PostService:
         post.likes.add(page_id)
         post.save()
 
-        publish(
-            "like_creation",
+        producer.publish(
+            "likes",
             {
                 "page_id": str(post.page.id),
                 "page_liked": page_id,
@@ -148,8 +148,8 @@ class PostService:
         post.likes.remove(page_id)
         post.save()
 
-        publish(
-            "like_removal",
+        producer.publish(
+            "likes",
             {
                 "page_id": str(post.page.id),
                 "page_liked": page_id,
