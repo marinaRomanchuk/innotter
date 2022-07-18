@@ -64,7 +64,7 @@ class PageService:
         page.save()
 
         producer.publish(
-            "followers",
+            "innotter",
             {
                 "page_id": str(page.id),
                 "follower_id": user.id,
@@ -134,7 +134,7 @@ class PostService:
         post.save()
 
         producer.publish(
-            "likes",
+            "innotter",
             {
                 "page_id": str(post.page.id),
                 "page_liked": page_id,
@@ -149,7 +149,7 @@ class PostService:
         post.save()
 
         producer.publish(
-            "likes",
+            "innotter",
             {
                 "page_id": str(post.page.id),
                 "page_liked": page_id,

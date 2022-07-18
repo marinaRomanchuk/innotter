@@ -18,7 +18,7 @@ def send_email(instance, **kwargs):
 @receiver(post_save, sender=Post)
 def send_post_creation_message(instance, **kwargs):
     producer.publish(
-        "posts",
+        "innotter",
         {
             "page_id": str(instance.page.id),
             "post_id": instance.id,
@@ -31,7 +31,7 @@ def send_post_creation_message(instance, **kwargs):
 @receiver(post_delete, sender=Post)
 def send_post_removal_message(instance, **kwargs):
     producer.publish(
-        "posts",
+        "innotter",
         {
             "page_id": str(instance.page.id),
             "post_id": instance.id,
