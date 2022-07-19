@@ -3,7 +3,7 @@ from django.dispatch import receiver
 
 from .models import Post
 from .tasks import send_message
-from .producer import producer
+from message_broker.page_producer import producer_posts
 
 
 @receiver(post_save, sender=Post)
@@ -17,8 +17,7 @@ def send_email(instance, **kwargs):
 
 @receiver(post_save, sender=Post)
 def send_post_creation_message(instance, **kwargs):
-    producer.publish(
-        "innotter",
+    producer_posts.publish(
         {
             "page_id": str(instance.page.id),
             "post_id": instance.id,
@@ -30,8 +29,7 @@ def send_post_creation_message(instance, **kwargs):
 
 @receiver(post_delete, sender=Post)
 def send_post_removal_message(instance, **kwargs):
-    producer.publish(
-        "innotter",
+    producer_posts.publish(
         {
             "page_id": str(instance.page.id),
             "post_id": instance.id,

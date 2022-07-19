@@ -2,9 +2,20 @@ import json
 import pika
 import os
 
+from abc import ABC, abstractmethod
+from functools import lru_cache
 
-class Producer:
-    def __init__(self):
+
+class AbstractProducer(ABC):
+    @abstractmethod
+    def publish(self, queue, body):
+        """Publishing a message in the message broker"""
+        pass
+
+
+class Producer(AbstractProducer):
+    def __init__(self, queue):
+        self.queue = queue
         self.credentials = pika.PlainCredentials(
             os.getenv("RABBITMQ_USER"), os.getenv("RABBITMQ_PASSWORD")
         )
@@ -20,12 +31,14 @@ class Producer:
         )
         self.channel = self.connection.channel()
 
-    def publish(self, queue, body):
+    def publish(self, body):
         self.channel.basic_publish(
             exchange='',
-            routing_key=queue,
+            routing_key=self.queue,
             body=json.dumps(body),
         )
 
 
-producer = Producer()
+producer_likes = Producer("innotter_likes")
+producer_posts = Producer("innotter_posts")
+producer_followers = Producer("innotter_followers")
