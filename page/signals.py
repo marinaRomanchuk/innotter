@@ -22,7 +22,7 @@ def send_post_creation_message(instance, **kwargs):
             "page_id": str(instance.page.id),
             "post_id": instance.id,
             "field": "posts_number",
-            "sign": "+",
+            "event": "save",
         },
     )
 
@@ -34,6 +34,6 @@ def send_post_removal_message(instance, **kwargs):
             "page_id": str(instance.page.id),
             "post_id": instance.id,
             "field": "posts_number",
-            "sign": "-",
+            "event": "unsave",
         },
     )

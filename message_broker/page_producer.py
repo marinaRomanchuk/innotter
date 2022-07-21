@@ -39,6 +39,11 @@ class Producer(AbstractProducer):
         )
 
 
-producer_likes = Producer("innotter_likes")
-producer_posts = Producer("innotter_posts")
-producer_followers = Producer("innotter_followers")
+@lru_cache
+def get_queue(queue_name: str) -> AbstractProducer:
+    return Producer(queue_name)
+
+
+producer_likes = get_queue("innotter_likes")
+producer_posts = get_queue("innotter_posts")
+producer_followers = get_queue("innotter_followers")

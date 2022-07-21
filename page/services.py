@@ -68,7 +68,7 @@ class PageService:
                 "page_id": str(page.id),
                 "follower_id": user.id,
                 "field": "followers_number",
-                "sign": "+",
+                "event": "follow",
             },
         )
 
@@ -137,7 +137,7 @@ class PostService:
                 "page_id": str(post.page.id),
                 "page_liked": page_id,
                 "field": "likes_number",
-                "sign": "+",
+                "event": "like",
             },
         )
 
@@ -151,6 +151,6 @@ class PostService:
                 "page_id": str(post.page.id),
                 "page_liked": page_id,
                 "field": "likes_number",
-                "sign": "-",
+                "event": "unlike",
             },
         )
